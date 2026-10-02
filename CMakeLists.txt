@@ -10,37 +10,33 @@ project(stb
 include(GNUInstallDirs)
 set(STB_LIB_NAME stb)
 
-add_library(stb
-   source/stb_image.c
+add_library(stb source/stb_image.c)
+add_library(stb::stb ALIAS stb)
+target_compile_options(stb PRIVATE -Wno-unused-result)
+
+target_include_directories(stb PUBLIC
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_include_directories(stb
-   PUBLIC include
-)
-
-target_compile_options(stb
-   PRIVATE -Wno-unused-result
-)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/stb.pc.in ${CMAKE_CURRENT_BINARY_DIR}/stb.pc @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stb.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 install(
    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/stb
 )
 
-configure_file(
-   ${CMAKE_CURRENT_SOURCE_DIR}/stb.pc.in
-   ${CMAKE_CURRENT_BINARY_DIR}/stb.pc @ONLY
-)
-
-install(
-   FILES ${CMAKE_CURRENT_BINARY_DIR}/stb.pc
-   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-)
-
 install(
    TARGETS stb
-   EXPORT stb_targets
+   EXPORT stbConfig
    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+   EXPORT stbConfig
+   NAMESPACE stb::
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/stb
 )
